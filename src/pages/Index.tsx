@@ -7,6 +7,7 @@ import NavBar from '@/components/NavBar';
 import CurrentWeatherCard from '@/components/CurrentWeatherCard';
 import HourlyForecastCard from '@/components/HourlyForecastCard';
 import DailyForecastCard from '@/components/DailyForecastCard';
+import DetailedForecastCard from '@/components/DetailedForecastCard';
 import LocationSearch from '@/components/LocationSearch';
 import { MapPin, Search } from 'lucide-react';
 
@@ -81,8 +82,14 @@ const Index = () => {
           <HourlyForecastCard forecast={currentWeather.hourly} />
           
           <DailyForecastCard forecast={currentWeather.daily} />
+          
+          <DetailedForecastCard weatherData={currentWeather} />
         </div>
       </main>
+      
+      <footer className="text-center py-4 text-xs text-muted-foreground border-t">
+        <p>Powered by Open-Meteo - Ad-Free Minimalist Weather</p>
+      </footer>
     </div>
   );
 };

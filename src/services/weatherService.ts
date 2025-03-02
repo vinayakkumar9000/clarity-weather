@@ -98,8 +98,8 @@ const API_ENDPOINT = 'https://api.open-meteo.com/v1/forecast';
 
 // Default parameters for weather data requests
 const DEFAULT_PARAMS = {
-  current: 'temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m',
-  hourly: 'temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,relative_humidity_2m',
+  current: 'temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m,uv_index',
+  hourly: 'temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,relative_humidity_2m,apparent_temperature,uv_index',
   daily: 'weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max,uv_index_max',
   timezone: 'auto',
   forecast_days: '7',
@@ -136,6 +136,7 @@ export const fetchWeatherData = async (location: WeatherLocation): Promise<Weath
         apparentTemperature: data.current.apparent_temperature,
         precipitation: data.current.precipitation,
         pressure: data.current.surface_pressure,
+        uvIndex: data.current.uv_index,
       },
       daily: data.daily.time.map((time: string, index: number) => ({
         date: time,
@@ -167,9 +168,31 @@ export const fetchWeatherData = async (location: WeatherLocation): Promise<Weath
 };
 
 // Function to search for locations based on a query
-export const searchLocations = async (query: string): Promise<WeatherLocation[]> => {
+export const searchLocations = async (
+  query: string, 
+  isPostalCode: boolean = false, 
+  countryContext?: string | null
+): Promise<WeatherLocation[]> => {
   try {
-    const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`);
+    let apiUrl = 'https://geocoding-api.open-meteo.com/v1/search';
+    let params: Record<string, string> = {
+      count: '8',
+      language: 'en',
+      format: 'json'
+    };
+    
+    if (isPostalCode) {
+      params.postal_code = query;
+    } else {
+      params.name = query;
+      // Add country context if available to improve local results
+      if (countryContext) {
+        params.timezone = countryContext;
+      }
+    }
+    
+    const queryString = new URLSearchParams(params).toString();
+    const response = await fetch(`${apiUrl}?${queryString}`);
     
     if (!response.ok) {
       throw new Error(`Geocoding API error: ${response.status}`);

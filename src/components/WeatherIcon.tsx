@@ -59,11 +59,17 @@ const WeatherIcon: React.FC<WeatherIconProps> = ({
   
   const IconComponent = iconMap[adjustedIconName] || <Cloud size={size} />;
   
-  // Extract div-compatible props for the container
-  const { strokeWidth, absoluteStrokeWidth, ...divProps } = props;
+  // Create a proper subset of props for the div and icon elements
+  // Completely remove all SVG props from divProps to avoid the ref type error
+  const divProps: React.HTMLAttributes<HTMLDivElement> = {};
   
-  // Split props - only pass SVG-specific props to the icon
-  const iconProps = { size, color: color || 'currentColor', strokeWidth, absoluteStrokeWidth };
+  // Only pass necessary SVG-specific props to the icon
+  const iconProps = { 
+    size, 
+    color: color || 'currentColor', 
+    strokeWidth: props.strokeWidth,
+    absoluteStrokeWidth: props.absoluteStrokeWidth 
+  };
   
   return (
     <div 
